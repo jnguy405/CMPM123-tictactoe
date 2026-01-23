@@ -87,6 +87,7 @@ namespace ClassGame {
                     ImGui::Text("Game Over: It's a Draw!");
                 } else {
                     ImGui::Text("Game Over! Winner: Player %d", gameWinner);
+                    game->stopGame();
                 }
                 
                 if (ImGui::Button("Play Again")) {
