@@ -62,7 +62,7 @@ void TicTacToe::setUpBoard() {
         // for x in 0 to 2
         for (int x = 0; x < 3; x++) {
             // calculate position based on x,y
-            ImVec2 position(100 + x * 110, 100 + y * 110);
+            ImVec2 position(100.0f + x * 110.0f, 100.0f + y * 110.0f);
             // call _grid[y][x].initHolder with position, color, and "square.png"
             _grid[y][x].initHolder(position, "square.png", x, y);
         }
