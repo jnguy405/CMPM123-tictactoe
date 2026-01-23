@@ -88,6 +88,10 @@ namespace ClassGame {
                 } else {
                     ImGui::Text("Game Over! Winner: Player %d", gameWinner);
                     game->stopGame();
+                    game->setUpBoard();
+                    gameOver = false;
+                    gameWinner = -1;
+                    LOG_INFO("Game reset - new game started");
                 }
                 
                 if (ImGui::Button("Play Again")) {
