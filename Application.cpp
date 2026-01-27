@@ -77,8 +77,8 @@ namespace ClassGame {
             // Display current player and game state
             if (game->getCurrentPlayer()) {
                 ImGui::Text("Current Player: %s (Player %d)", 
-                    game->getCurrentPlayer()->playerNumber() == 1 ? "X" : "O", 
-                    game->getCurrentPlayer()->playerNumber());
+                    game->getCurrentPlayer()->playerNumber() == 0 ? "X" : "O", 
+                    game->getCurrentPlayer()->playerNumber() + 1);
             }
             
             // Game status
@@ -337,7 +337,7 @@ namespace ClassGame {
         Player *winner = game->checkForWinner();
         if (winner) {
             gameOver = true;
-            gameWinner = winner->playerNumber();
+            gameWinner = winner->playerNumber() + 1;
             LOG_INFO_TAG("Game Over! Winner: Player " + std::to_string(gameWinner), "GAME");
         } else if (game->checkForDraw()) {
             gameOver = true;
@@ -349,9 +349,11 @@ namespace ClassGame {
         gameActCounter++;
         if (!gameOver) {
             // Log the state string after the move
+            // Note: getCurrentPlayer() has already switched, so we need the previous player
+            int previousPlayerNum = (game->getCurrentPlayer()->playerNumber() + 1) % 2 + 1;
             std::string state = game->stateString();
             LOG_INFO_TAG("End of turn #" + std::to_string(gameActCounter) + 
-                        " | Player: " + std::to_string(game->getCurrentPlayer()->playerNumber()) +
+                        " | Player: " + std::to_string(previousPlayerNum) +
                         " | Board State: " + state, 
                         "GAME");
         }

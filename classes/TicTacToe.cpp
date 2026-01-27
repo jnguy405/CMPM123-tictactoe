@@ -41,7 +41,7 @@ TicTacToe::~TicTacToe()
 // DO NOT CHANGE: This returns a new Bit with the right texture and owner
 Bit* TicTacToe::PieceForPlayer(const int playerNumber) {
     Bit *bit = new Bit();
-    bit->LoadTextureFromFile(playerNumber == 1 ? "x.png" : "o.png");
+    bit->LoadTextureFromFile(playerNumber == 0 ? "x.png" : "o.png");
     bit->setOwner(getPlayerAt(playerNumber));
     return bit;
 }
@@ -252,4 +252,36 @@ void TicTacToe::setStateString(const std::string &s) {
 void TicTacToe::updateAI() {
     // we will implement the AI in the next assignment!
     // meep meep im a bot
+
+    // std::string currentState = stateString();
+    // int bestMove = -10000;
+    // int bestSquare = -1;
+    // for (int i=0; i<9;i++)
+    // if currentSate[i] is '0'
+    // currentState[i] = '2' // AI is player 2
+    // int newValue = -negamax(currentState, depth-1, -beta, -alpha, HUMAN_PLAYER)
+    // if newValue > bestMove
+    // bestSquare = i
+    // bestMove = newValue
+    // currentState[i] = '0' // undo move
+
+    // if bestSquare != -1
+    // actionForEmptyHolder(&_grid[bestSquare/3][bestSquare%3]);
+    // endTurn();
 }
+
+//bool aiTestForTerminalState(std::string& state, int playerColor) {
+    // if (state.find('0') == std::string::npos) return false;
+//    return true;
+
+// int aiBoardEvaluation(std::string& state) {
+    // check for win for AI player
+    // return +10
+    // check for win for human player
+    // return -10
+    // return 0
+
+//int TicTacToe::negamax(std::string& state, int depth, int alpha, int beta, int playerColor) {
+    // if (aiTestForTerminal(state, playerColor) || depth == 0)
+    // return aiBoardEvaluation(state)
+//    return 0;
