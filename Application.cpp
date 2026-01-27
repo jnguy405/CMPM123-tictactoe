@@ -124,6 +124,7 @@ namespace ClassGame {
             static bool showInfo = true;
             static bool showWarning = true;
             static bool showError = true;
+            static bool showScores = false;
 
             // Options button and popup
             if (ImGui::Button("Options")) {
@@ -137,6 +138,7 @@ namespace ClassGame {
                 ImGui::Checkbox("Show Info", &showInfo);
                 ImGui::Checkbox("Show Warnings", &showWarning);
                 ImGui::Checkbox("Show Errors", &showError);
+                ImGui::Checkbox("Show Scores", &showScores);
                 
                 ImGui::Separator();
                 
@@ -183,6 +185,9 @@ namespace ClassGame {
                     display = false; 
                 }
                 else if (entries[i].find("[ERROR]") != std::string::npos && !showError) { 
+                    display = false; 
+                }
+                else if (entries[i].find("[AI SCORE]") != std::string::npos && !showScores) { 
                     display = false; 
                 }
                 
@@ -360,7 +365,7 @@ namespace ClassGame {
                     int score = eval.second;
                     std::string chosenStr = (pos == choice) ? " <- CHOSEN" : "";
                     LOG_INFO_TAG("  Position " + std::to_string(pos) + " (row " + std::to_string(pos/3) + 
-                                ", col " + std::to_string(pos%3) + "): score = " + std::to_string(score) + chosenStr, "AI");
+                                ", col " + std::to_string(pos%3) + "): score = " + std::to_string(score) + chosenStr, "AI SCORE");
                 }
             }
             
