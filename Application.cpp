@@ -37,6 +37,15 @@ namespace ClassGame {
         gameActCounter = 0;
     }
 
+    void ResetGame() {
+        if (!game) return;
+        game->stopGame();
+        game->setUpBoard();
+        gameOver = false;
+        gameWinner = -1;
+        LOG_INFO("Game reset - new game started");
+    }
+
     void GameStartUp() {
         // Initialize Logger
         Logger::GetInstance().Init();
@@ -87,29 +96,16 @@ namespace ClassGame {
                     ImGui::Text("Game Over: It's a Draw!");
                 } else {
                     ImGui::Text("Game Over! Winner: Player %d", gameWinner);
-                    game->stopGame();
-                    game->setUpBoard();
-                    gameOver = false;
-                    gameWinner = -1;
-                    LOG_INFO("Game reset - new game started");
                 }
                 
                 if (ImGui::Button("Play Again")) {
-                    game->stopGame();
-                    game->setUpBoard();
-                    gameOver = false;
-                    gameWinner = -1;
-                    LOG_INFO("Game reset - new game started");
+                    ResetGame();
                 }
                 ImGui::SameLine();
             }
             
             if (!gameOver && ImGui::Button("Reset Game")) {
-                game->stopGame();
-                game->setUpBoard();
-                gameOver = false;
-                gameWinner = -1;
-                LOG_INFO("Game manually reset");
+                ResetGame();
             }
             
             ImGui::Separator();
@@ -352,6 +348,22 @@ namespace ClassGame {
             // Note: getCurrentPlayer() has already switched, so we need the previous player
             int previousPlayerNum = (game->getCurrentPlayer()->playerNumber() + 1) % 2 + 1;
             std::string state = game->stateString();
+            
+            // If it was player 2's (AI) turn, log detailed evaluations
+            if (previousPlayerNum == 2) {
+                auto evaluations = game->getLastAIEvaluations();
+                int choice = game->getLastAIChoice();
+                
+                // Log each position's evaluation
+                for (const auto& eval : evaluations) {
+                    int pos = eval.first;
+                    int score = eval.second;
+                    std::string chosenStr = (pos == choice) ? " <- CHOSEN" : "";
+                    LOG_INFO_TAG("  Position " + std::to_string(pos) + " (row " + std::to_string(pos/3) + 
+                                ", col " + std::to_string(pos%3) + "): score = " + std::to_string(score) + chosenStr, "AI");
+                }
+            }
+            
             LOG_INFO_TAG("End of turn #" + std::to_string(gameActCounter) + 
                         " | Player: " + std::to_string(previousPlayerNum) +
                         " | Board State: " + state, 

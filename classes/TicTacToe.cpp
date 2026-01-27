@@ -24,8 +24,20 @@
 // The rest of the routines are written as “comment-first” TODOs for you to complete.
 // -----------------------------------------------------------------------------
 
-const int AI_PLAYER   = 1;      // index of the AI player (O)
-const int HUMAN_PLAYER= -1;      // index of the human player (X)
+const int AI_PLAYER   = 1;      // index of the AI player (O) - player 1 -> stateString + 1
+const int HUMAN_PLAYER= -1;      // index of the human player (X) - player 0 -> stateString + 1
+
+// Winning combinations for tic-tac-toe (indices 0-8)
+const int WINNING_COMBOS[8][3] = {
+    {0, 1, 2},  // top row
+    {3, 4, 5},  // middle row
+    {6, 7, 8},  // bottom row
+    {0, 3, 6},  // left column
+    {1, 4, 7},  // middle column
+    {2, 5, 8},  // right column
+    {0, 4, 8},  // diagonal top-left to bottom-right
+    {2, 4, 6}   // diagonal top-right to bottom-left
+};
 
 TicTacToe::TicTacToe()
 {
@@ -134,23 +146,11 @@ Player* TicTacToe::ownerAt(int index) const {
 }
 
 Player* TicTacToe::checkForWinner() {
-    // array of winning trios
-    int winningCombos[8][3] = {
-        {0, 1, 2},  // top row
-        {3, 4, 5},  // middle row
-        {6, 7, 8},  // bottom row
-        {0, 3, 6},  // left column
-        {1, 4, 7},  // middle column
-        {2, 5, 8},  // right column
-        {0, 4, 8},  // diagonal top-left to bottom-right
-        {2, 4, 6}   // diagonal top-right to bottom-left
-    };
-    
     // check each winning combination
     for (int i = 0; i < 8; i++) {
-        Player* first = ownerAt(winningCombos[i][0]);
-        Player* second = ownerAt(winningCombos[i][1]);
-        Player* third = ownerAt(winningCombos[i][2]);
+        Player* first = ownerAt(WINNING_COMBOS[i][0]);
+        Player* second = ownerAt(WINNING_COMBOS[i][1]);
+        Player* third = ownerAt(WINNING_COMBOS[i][2]);
         
         // if all three are owned by the same player (and not null), we have a winner
         if (first != nullptr && first == second && second == third) {
@@ -250,38 +250,89 @@ void TicTacToe::setStateString(const std::string &s) {
 // this is the function that will be called by the AI
 //
 void TicTacToe::updateAI() {
-    // we will implement the AI in the next assignment!
-    // meep meep im a bot
-
-    // std::string currentState = stateString();
-    // int bestMove = -10000;
-    // int bestSquare = -1;
-    // for (int i=0; i<9;i++)
-    // if currentSate[i] is '0'
-    // currentState[i] = '2' // AI is player 2
-    // int newValue = -negamax(currentState, depth-1, -beta, -alpha, HUMAN_PLAYER)
-    // if newValue > bestMove
-    // bestSquare = i
-    // bestMove = newValue
-    // currentState[i] = '0' // undo move
-
-    // if bestSquare != -1
-    // actionForEmptyHolder(&_grid[bestSquare/3][bestSquare%3]);
-    // endTurn();
+    // Get current board state
+    std::string currentState = stateString();
+    int bestMove = -10000;
+    int bestSquare = -1;
+    
+    // Clear previous evaluations
+    _lastAIEvaluations.clear();
+    _lastAIChoice = -1;
+    
+    // Try each empty square
+    for (int i = 0; i < 9; i++) {
+        if (currentState[i] == '0') {
+            // Make AI move (player 2)
+            currentState[i] = '2';
+            
+            // Evaluate this move using negamax
+            int newValue = -negamax(currentState, 9, -10000, 10000, HUMAN_PLAYER);
+            
+            // Undo move
+            currentState[i] = '0';
+            
+            // Store evaluation for logging
+            _lastAIEvaluations.push_back({i, newValue});
+            
+            // Track best move (use >= to prefer center for ties)
+            if (newValue > bestMove || bestSquare == -1) {
+                bestSquare = i;
+                bestMove = newValue;
+            }
+        }
+    }
+    
+    // Make the best move if found
+    if (bestSquare != -1) {
+        _lastAIChoice = bestSquare;
+        actionForEmptyHolder(&_grid[bestSquare / 3][bestSquare % 3]);
+        endTurn();
+    }
 }
 
-//bool aiTestForTerminalState(std::string& state, int playerColor) {
-    // if (state.find('0') == std::string::npos) return false;
-//    return true;
+bool TicTacToe::aiTestForTerminalState(const std::string& state) {
+    return state.find('0') == std::string::npos;
+}
 
-// int aiBoardEvaluation(std::string& state) {
-    // check for win for AI player
-    // return +10
-    // check for win for human player
-    // return -10
-    // return 0
+int TicTacToe::aiBoardEvaluation(const std::string& state) {
+    // Check for winner in all 8 winning combinations
+    for (int i = 0; i < 8; i++) {
+        char first = state[WINNING_COMBOS[i][0]];
+        char second = state[WINNING_COMBOS[i][1]];
+        char third = state[WINNING_COMBOS[i][2]];
+        
+        // Check if AI player (2) wins
+        if (first == '2' && second == '2' && third == '2') {
+            return 10;
+}
+        // Check if human player (1) wins
+        if (first == '1' && second == '1' && third == '1') {
+            return -10;
+        }
+    }
 
-//int TicTacToe::negamax(std::string& state, int depth, int alpha, int beta, int playerColor) {
-    // if (aiTestForTerminal(state, playerColor) || depth == 0)
-    // return aiBoardEvaluation(state)
-//    return 0;
+    return 0;
+}
+
+int TicTacToe::negamax(std::string state, int depth, int alpha, int beta, int playerColor) {
+    // Terminal state or max depth reached
+    if (aiTestForTerminalState(state) || depth == 0) {
+        int evaluation = aiBoardEvaluation(state);
+        return evaluation * (playerColor == AI_PLAYER ? 1 : -1); // Evaluate from current player's perspective
+    }
+    
+    int maxEval = -10000;
+    for (int i = 0; i < 9; i++) {
+        // Find empty square
+        if (state[i] == '0') {
+            
+            state[i] = (playerColor == AI_PLAYER ? '2' : '1');                  // Make move
+            int eval = -negamax(state, depth - 1, -beta, -alpha, -playerColor); // Recursively evaluate with negamax function
+            state[i] = '0';                                                     // Undo move
+            
+            // Update best evaluation
+            maxEval = (eval > maxEval) ? eval : maxEval;
+        }
+    }
+    return maxEval;
+}

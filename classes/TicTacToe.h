@@ -31,9 +31,20 @@ public:
 	void        updateAI() override;
     bool        gameHasAI() override { return true; }
     BitHolder &getHolderAt(const int x, const int y) override { return _grid[y][x]; }
+    
+    // AI evaluation tracking
+    std::vector<std::pair<int, int>> getLastAIEvaluations() const { return _lastAIEvaluations; }
+    int getLastAIChoice() const { return _lastAIChoice; }
+    
 private:
     Bit *       PieceForPlayer(const int playerNumber);
     Player*     ownerAt(int index ) const;
+    bool        aiTestForTerminalState(const std::string& state);
+    int         aiBoardEvaluation(const std::string& state);
+    int         negamax(std::string state, int depth, int alpha, int beta, int playerColor);
+    
+    std::vector<std::pair<int, int>> _lastAIEvaluations;  // pair of (position, score)
+    int _lastAIChoice;
 
     Square      _grid[3][3];
 };

@@ -93,11 +93,18 @@ void Game::endTurn()
 
 void Game::scanForMouse()
 {
-    //if (gameHasAI() && getCurrentPlayer()->isAIPlayer()) 
-    //{
-    //    updateAI();
-    //    return;
-    //}
+    // Don't process input or AI moves if the game is over
+    // Note: gameOver state is managed by the application layer through EndOfTurn()
+    // We check if there's a winner or draw to avoid further moves
+    if (checkForWinner() != nullptr || checkForDraw()) {
+        return;
+    }
+
+    if (gameHasAI() && getCurrentPlayer()->playerNumber() == 1) 
+    {
+        updateAI();
+        return;
+    }
 
     ImVec2 mousePos = ImGui::GetMousePos();
     mousePos.x -= ImGui::GetWindowPos().x;
