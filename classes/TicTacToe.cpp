@@ -230,12 +230,12 @@ void TicTacToe::setStateString(const std::string &s) {
         int x = index % 3;
         
         if (playerNumber == 1) {
-            // create piece for player 0 (X)
+            // create piece for player 1 (O)
             Bit* piece = PieceForPlayer(0);
             piece->setPosition(_grid[y][x].getPosition());
             _grid[y][x].setBit(piece);
         } else if (playerNumber == 2) {
-            // create piece for player 1 (O)
+            // create piece for player 2 (X)
             Bit* piece = PieceForPlayer(1);
             piece->setPosition(_grid[y][x].getPosition());
             _grid[y][x].setBit(piece);
