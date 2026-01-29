@@ -56,7 +56,7 @@ namespace ClassGame {
         
         // Test log entry types/tags
         LOG_INFO("TicTacToe game initialized");
-        LOG_INFO_TAG("Player 1: O | Player 2: X", "GAME");
+        LOG_INFO_TAG("Player 1: X | Player 2: O", "GAME");
         
         // Initialize control variables
         gameActCounter = 0;
@@ -86,7 +86,7 @@ namespace ClassGame {
             // Display current player and game state
             if (game->getCurrentPlayer()) {
                 ImGui::Text("Current Player: %s (Player %d)", 
-                    game->getCurrentPlayer()->playerNumber() == 1 ? "X" : "O", 
+                    game->getCurrentPlayer()->playerNumber() == 1 ? "O" : "X", 
                     game->getCurrentPlayer()->playerNumber() + 1);
             }
             

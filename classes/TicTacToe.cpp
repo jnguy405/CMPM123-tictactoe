@@ -24,8 +24,8 @@
 // The rest of the routines are written as “comment-first” TODOs for you to complete.
 // -----------------------------------------------------------------------------
 
-const int AI_PLAYER   = 1;      // AI player (X) - player 2
-const int HUMAN_PLAYER= -1;      // human player (O) - player 1
+const int AI_PLAYER   = 1;      // AI player (O) - player 2
+const int HUMAN_PLAYER= -1;      // human player (X) - player 1
 
 // Winning combinations for tic-tac-toe (indices 0-8)
 const int WINNING_COMBOS[8][3] = {
@@ -53,7 +53,7 @@ TicTacToe::~TicTacToe()
 // DO NOT CHANGE: This returns a new Bit with the right texture and owner
 Bit* TicTacToe::PieceForPlayer(const int playerNumber) {
     Bit *bit = new Bit();
-    bit->LoadTextureFromFile(playerNumber == 1 ? "x.png" : "o.png");
+    bit->LoadTextureFromFile(playerNumber == 1 ? "o.png" : "x.png");
     bit->setOwner(getPlayerAt(playerNumber));
     return bit;
 }
@@ -230,12 +230,12 @@ void TicTacToe::setStateString(const std::string &s) {
         int x = index % 3;
         
         if (playerNumber == 1) {
-            // create piece for player 1 (O)
+            // create piece for player 1 (X)
             Bit* piece = PieceForPlayer(0);
             piece->setPosition(_grid[y][x].getPosition());
             _grid[y][x].setBit(piece);
         } else if (playerNumber == 2) {
-            // create piece for player 2 (X)
+            // create piece for player 2 (O)
             Bit* piece = PieceForPlayer(1);
             piece->setPosition(_grid[y][x].getPosition());
             _grid[y][x].setBit(piece);
@@ -266,24 +266,13 @@ void TicTacToe::updateAI() {
             currentState[i] = '2';
             
             // Evaluate this move using negamax
-            int newValue = -negamax(currentState, 9, -10000, 10000, HUMAN_PLAYER);
-            
-            // Undo move
-            currentState[i] = '0';
-            
-            // Store evaluation for logging
-            _lastAIEvaluations.push_back({i, newValue});
-            
-            // Track best move (use >= to prefer center for ties)
-
-            //
-            // Ask about blocking evaluation
-            //
-            if (newValue > bestMove || bestSquare == -1) {
+            int newValue = -negamax(currentState, 2, 0, 0, HUMAN_PLAYER);
+            if (newValue > bestMove) {
                 bestSquare = i;
                 bestMove = newValue;
             }
-        }
+            currentState[i] = '0';
+            }
     }
     
     // Make the best move if found
@@ -321,11 +310,12 @@ int TicTacToe::aiBoardEvaluation(const std::string& state) {
 int TicTacToe::negamax(std::string state, int depth, int alpha, int beta, int playerColor) {
     // Terminal state or max depth reached
     if (aiTestForTerminalState(state) || depth == 0) {
-        int evaluation = aiBoardEvaluation(state);
-
         // Evaluate from current player's perspective
-        return evaluation * (playerColor == AI_PLAYER ? 1 : -1);
+        return aiBoardEvaluation(state) * playerColor;
     }
+
+    //if ai score != 0
+    //return -(score - depth)
     
     int maxEval = -10000;
     for (int i = 0; i < 9; i++) {
@@ -333,12 +323,10 @@ int TicTacToe::negamax(std::string state, int depth, int alpha, int beta, int pl
         // Find empty square
         if (state[i] == '0') {
             
-            state[i] = (playerColor == AI_PLAYER ? '2' : '1');                  // Make move
-            int eval = -negamax(state, depth - 1, -beta, -alpha, -playerColor); // Recursively evaluate with negamax function
+            state[i] = (playerColor == HUMAN_PLAYER ? '1' : '2');               // Make move
+            int eval = -negamax(state, depth + 1, -beta, -alpha, -playerColor); // Recursively evaluate with negamax function
+            maxEval = (eval > maxEval) ? eval : maxEval;                        // Update best evaluation
             state[i] = '0';                                                     // Undo move
-            
-            // Update best evaluation
-            maxEval = (eval > maxEval) ? eval : maxEval;
         }
     }
     return maxEval;
