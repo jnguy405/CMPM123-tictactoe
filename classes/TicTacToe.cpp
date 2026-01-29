@@ -24,8 +24,8 @@
 // The rest of the routines are written as “comment-first” TODOs for you to complete.
 // -----------------------------------------------------------------------------
 
-const int AI_PLAYER   = 1;      // index of the AI player (O) - player 1 -> stateString + 1
-const int HUMAN_PLAYER= -1;      // index of the human player (X) - player 0 -> stateString + 1
+const int AI_PLAYER   = 1;      // AI player (X) - player 1 -> stateString + 1
+const int HUMAN_PLAYER= -1;      // human player (O) - player 0 -> stateString + 1
 
 // Winning combinations for tic-tac-toe (indices 0-8)
 const int WINNING_COMBOS[8][3] = {
@@ -53,7 +53,7 @@ TicTacToe::~TicTacToe()
 // DO NOT CHANGE: This returns a new Bit with the right texture and owner
 Bit* TicTacToe::PieceForPlayer(const int playerNumber) {
     Bit *bit = new Bit();
-    bit->LoadTextureFromFile(playerNumber == 0 ? "x.png" : "o.png");
+    bit->LoadTextureFromFile(playerNumber == 1 ? "x.png" : "o.png");
     bit->setOwner(getPlayerAt(playerNumber));
     return bit;
 }
@@ -275,6 +275,10 @@ void TicTacToe::updateAI() {
             _lastAIEvaluations.push_back({i, newValue});
             
             // Track best move (use >= to prefer center for ties)
+
+            //
+            // Ask about blocking evaluation
+            //
             if (newValue > bestMove || bestSquare == -1) {
                 bestSquare = i;
                 bestMove = newValue;
@@ -318,11 +322,14 @@ int TicTacToe::negamax(std::string state, int depth, int alpha, int beta, int pl
     // Terminal state or max depth reached
     if (aiTestForTerminalState(state) || depth == 0) {
         int evaluation = aiBoardEvaluation(state);
-        return evaluation * (playerColor == AI_PLAYER ? 1 : -1); // Evaluate from current player's perspective
+
+        // Evaluate from current player's perspective
+        return evaluation * (playerColor == AI_PLAYER ? 1 : -1);
     }
     
     int maxEval = -10000;
     for (int i = 0; i < 9; i++) {
+
         // Find empty square
         if (state[i] == '0') {
             
