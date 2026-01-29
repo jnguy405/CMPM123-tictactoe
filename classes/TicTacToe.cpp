@@ -24,8 +24,8 @@
 // The rest of the routines are written as “comment-first” TODOs for you to complete.
 // -----------------------------------------------------------------------------
 
-const int AI_PLAYER   = 1;      // AI player (X) - player 1 -> stateString + 1
-const int HUMAN_PLAYER= -1;      // human player (O) - player 0 -> stateString + 1
+const int AI_PLAYER   = 1;      // AI player (X) - player 2
+const int HUMAN_PLAYER= -1;      // human player (O) - player 1
 
 // Winning combinations for tic-tac-toe (indices 0-8)
 const int WINNING_COMBOS[8][3] = {
