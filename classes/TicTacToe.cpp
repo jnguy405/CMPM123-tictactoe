@@ -250,12 +250,10 @@ void TicTacToe::setStateString(const std::string &s) {
 // this is the function that will be called by the AI
 //
 void TicTacToe::updateAI() {
-    // Get current board state
     std::string currentState = stateString();
     int bestMove = -10000;
     int bestSquare = -1;
     
-    // Clear previous evaluations
     _lastAIEvaluations.clear();
     _lastAIChoice = -1;
     
@@ -264,18 +262,22 @@ void TicTacToe::updateAI() {
         if (currentState[i] == '0') {
             // Make AI move (player 2)
             currentState[i] = '2';
-            
-            // Evaluate this move using negamax
-            int newValue = -negamax(currentState, 2, 0, 0, HUMAN_PLAYER);
-            if (newValue > bestMove) {
-                bestSquare = i;
-                bestMove = newValue;
-            }
+            int evaluation = -negamax(currentState, 0, -10000, 10000, HUMAN_PLAYER);
+
+            // Undo move
             currentState[i] = '0';
+            // Track evaluation for debugging
+            _lastAIEvaluations.push_back({i, evaluation});
+
+            // Update best move
+            if (evaluation > bestMove) {
+                bestMove = evaluation;
+                bestSquare = i;
             }
+        }
     }
     
-    // Make the best move if found
+    // Make the best move
     if (bestSquare != -1) {
         _lastAIChoice = bestSquare;
         actionForEmptyHolder(&_grid[bestSquare / 3][bestSquare % 3]);
@@ -308,26 +310,38 @@ int TicTacToe::aiBoardEvaluation(const std::string& state) {
 }
 
 int TicTacToe::negamax(std::string state, int depth, int alpha, int beta, int playerColor) {
-    // Terminal state or max depth reached
-    if (aiTestForTerminalState(state) || depth == 0) {
-        // Evaluate from current player's perspective
-        return aiBoardEvaluation(state) * playerColor;
+    // Check for winner first
+    int score = aiBoardEvaluation(state);
+    if (score != 0) {
+        // Return score adjusted by depth to prefer faster wins/losses
+        // Subtract depth so immediate wins are valued more than distant wins
+        return (score - depth) * playerColor;
     }
-
-    //if ai score != 0
-    //return -(score - depth)
+    
+    // Check for draw (board full)
+    if (aiTestForTerminalState(state) || depth >= 9) {
+        return 0; // Draw
+    }
     
     int maxEval = -10000;
+    
     for (int i = 0; i < 9; i++) {
-
-        // Find empty square
         if (state[i] == '0') {
+            state[i] = (playerColor == AI_PLAYER ? '2' : '1');
+            int eval = -negamax(state, depth + 1, -beta, -alpha, -playerColor);
             
-            state[i] = (playerColor == HUMAN_PLAYER ? '1' : '2');               // Make move
-            int eval = -negamax(state, depth + 1, -beta, -alpha, -playerColor); // Recursively evaluate with negamax function
-            maxEval = (eval > maxEval) ? eval : maxEval;                        // Update best evaluation
-            state[i] = '0';                                                     // Undo move
+            // Undo move
+            state[i] = '0';
+            
+            // Update best value
+            maxEval = (eval > maxEval) ? eval : maxEval;
+            alpha = (eval > alpha) ? eval : alpha;
+            
+            // Alpha-beta pruning
+            if (alpha >= beta) {
+                break;
+            }
         }
     }
-    return maxEval;
+    return maxEval;  // Return the best evaluation found
 }
